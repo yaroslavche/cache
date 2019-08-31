@@ -16,7 +16,11 @@ class FilecacheStatisticsManager implements StatisticsManagerInterface
 {
     private $path;
 
-    public function __construct($path)
+    /**
+     * FilecacheStatisticsManager constructor.
+     * @param string $path
+     */
+    public function __construct(string $path)
     {
         $this->path = $path;
     }
@@ -24,13 +28,17 @@ class FilecacheStatisticsManager implements StatisticsManagerInterface
     /**
      * @return Statistics[]
      */
-    public function getStatistics()
+    public function getStatistics(): array
     {
         if (!file_exists($this->getFilename())) {
             return array('File cache' => new Statistics());
         }
 
-        $stats = unserialize(file_get_contents($this->getFilename()));
+        $fileContent = file_get_contents($this->getFilename());
+        if (false === $fileContent) {
+            return [];
+        }
+        $stats = unserialize($fileContent);
 
         $hits = isset($stats['hits']) ? $stats['hits'] : 0;
         $misses = isset($stats['misses']) ? $stats['misses'] : 0;
@@ -43,7 +51,7 @@ class FilecacheStatisticsManager implements StatisticsManagerInterface
      *
      * @return string
      */
-    private function getFilename()
+    private function getFilename(): string
     {
         return $this->path . DIRECTORY_SEPARATOR . '__stats';
     }

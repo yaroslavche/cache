@@ -2,7 +2,7 @@
 
 namespace Beryllium\Cache\Statistics\Manager;
 
-use Beryllium\Cache\Statistics;
+use Beryllium\Cache\Statistics\Statistics;
 
 /**
  * Interface for managing statistics
@@ -17,5 +17,5 @@ interface StatisticsManagerInterface
     /**
      * @return Statistics[]
      */
-    public function getStatistics();
+    public function getStatistics(): array;
 }

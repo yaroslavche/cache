@@ -12,9 +12,12 @@ namespace Beryllium\Cache\Statistics;
  */
 class Statistics
 {
+    /** @var int $hits */
     protected $hits;
+    /** @var int $misses */
     protected $misses;
-    protected $additionalData = array();
+    /** @var array $additionalData */
+    protected $additionalData;
 
     /**
      * Create statistics object based on raw data
@@ -22,8 +25,9 @@ class Statistics
      * @param int $hits
      * @param int $misses
      */
-    public function __construct($hits = 0, $misses = 0)
+    public function __construct(int $hits = 0, int $misses = 0)
     {
+        $this->additionalData = [];
         $this->hits = $hits;
         $this->misses = $misses;
     }
@@ -33,7 +37,7 @@ class Statistics
      *
      * @return int
      */
-    public function getHits()
+    public function getHits(): int
     {
         return $this->hits;
     }
@@ -43,7 +47,7 @@ class Statistics
      *
      * @return int
      */
-    public function getMisses()
+    public function getMisses(): int
     {
         return $this->misses;
     }
@@ -53,35 +57,35 @@ class Statistics
      *
      * @return float
      */
-    public function getHelpfulness()
+    public function getHelpfulness(): float
     {
         if ($this->hits + $this->misses === 0) {
             return 0.00;
         }
 
-        return number_format(($this->hits / ($this->hits + $this->misses)) * 100, 2);
+        return (float)number_format(($this->hits / ($this->hits + $this->misses)) * 100, 2);
     }
 
     /**
-     * @param array $additionalData
+     * @param mixed[] $additionalData
      */
-    public function setAdditionalData($additionalData)
+    public function setAdditionalData(array $additionalData): void
     {
         $this->additionalData = $additionalData;
     }
 
     /**
-     * @return array
+     * @return mixed[]
      */
-    public function getAdditionalData()
+    public function getAdditionalData(): array
     {
         return $this->additionalData;
     }
 
     /**
-     * @return array
+     * @return mixed[]
      */
-    public function getFormattedArray()
+    public function getFormattedArray(): array
     {
         return array_merge(
             $this->getAdditionalData(),

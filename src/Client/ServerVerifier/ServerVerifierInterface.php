@@ -18,5 +18,5 @@ interface ServerVerifierInterface
      *
      * @return bool
      */
-    public function verify($ip, $port);
+    public function verify(string $ip, int $port): bool;
 }

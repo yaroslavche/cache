@@ -16,7 +16,11 @@ class FilecacheStatisticsTracker implements StatisticsTrackerInterface
     private $misses = 0;
     private $path;
 
-    public function __construct($path)
+    /**
+     * FilecacheStatisticsTracker constructor.
+     * @param string $path
+     */
+    public function __construct(string $path)
     {
         $this->path = $path;
 
@@ -28,7 +32,7 @@ class FilecacheStatisticsTracker implements StatisticsTrackerInterface
     /**
      * {@inheritDoc}
      */
-    public function addHit()
+    public function addHit(): void
     {
         $this->hits++;
     }
@@ -36,7 +40,7 @@ class FilecacheStatisticsTracker implements StatisticsTrackerInterface
     /**
      * {@inheritDoc}
      */
-    public function addMiss()
+    public function addMiss(): void
     {
         $this->misses++;
     }
@@ -44,19 +48,26 @@ class FilecacheStatisticsTracker implements StatisticsTrackerInterface
     /**
      * Write statistics to cache directory
      */
-    public function write()
+    public function write(): bool
     {
         $stats = array('hits' => $this->hits, 'misses' => $this->misses);
 
         file_put_contents($this->getFilename(), serialize($stats));
+
+        /** interface return type is bool in annotation. May be void? */
+        return true;
     }
 
     /**
      * Initialize statistics from an existing file
      */
-    private function initialize()
+    private function initialize(): void
     {
-        $stats = unserialize(file_get_contents($this->getFilename()));
+        $fileContent = file_get_contents($this->getFilename());
+        if (false === $fileContent) {
+            return;
+        }
+        $stats = unserialize($fileContent);
 
         $this->hits = isset($stats['hits']) ? $stats['hits'] : 0;
         $this->misses = isset($stats['misses']) ? $stats['misses'] : 0;
@@ -67,7 +78,7 @@ class FilecacheStatisticsTracker implements StatisticsTrackerInterface
      *
      * @return string
      */
-    private function getFilename()
+    private function getFilename(): string
     {
         return $this->path . DIRECTORY_SEPARATOR . '__stats';
     }

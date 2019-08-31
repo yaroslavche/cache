@@ -24,7 +24,7 @@ class APCStatisticsManager implements StatisticsManagerInterface
     /**
      * @return Statistics[]
      */
-    public function getStatistics()
+    public function getStatistics(): array
     {
         if (!$this->safe) {
             return array();

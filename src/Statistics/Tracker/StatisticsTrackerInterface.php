@@ -2,8 +2,6 @@
 
 namespace Beryllium\Cache\Statistics\Tracker;
 
-use Beryllium\Cache\Statistics;
-
 /**
  * Interface for tracking cache statistics
  *
@@ -17,17 +15,17 @@ interface StatisticsTrackerInterface
     /**
      * Add a hit to the tracker
      */
-    public function addHit();
+    public function addHit(): void;
 
     /**
      * Add a miss to the tracker
      */
-    public function addMiss();
+    public function addMiss(): void;
 
     /**
      * Write the current statistics to a persistence layer
      *
      * @return bool
      */
-    public function write();
+    public function write(): bool;
 }

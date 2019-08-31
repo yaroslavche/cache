@@ -27,7 +27,7 @@ class MemcacheStatisticsManager implements StatisticsManagerInterface
     /**
      * @return Statistics[]
      */
-    public function getStatistics()
+    public function getStatistics(): array
     {
         $result = array();
 
