@@ -7,12 +7,24 @@
          convertWarningsToExceptions="true"
          processIsolation="false"
          stopOnFailure="false"
-         bootstrap="tests/bootstrap.php"
-        >
+         bootstrap="vendor/autoload.php"
+>
+
+    <php>
+        <ini name="memory_limit" value="-1"/>
+        <ini name="apc.enable_cli" value="1"/>
+        <ini name="error_reporting" value="-1"/>
+    </php>
 
     <testsuites>
         <testsuite name="Beryllium Cache Test Suite">
-            <directory>./tests</directory>
+            <directory suffix="Test.php">./tests</directory>
         </testsuite>
     </testsuites>
+
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">src</directory>
+        </whitelist>
+    </filter>
 </phpunit>
