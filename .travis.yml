@@ -28,5 +28,6 @@ install:
 
 script:
   - composer cscheck
+#  - composer phpstan
   - php -d apc.enable_cli=1 vendor/bin/phpunit
-  - php -d apc.enable_cli=1 vendor/bin/infection
+#  - php -d apc.enable_cli=1 vendor/bin/infection
