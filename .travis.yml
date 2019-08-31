@@ -27,7 +27,12 @@ install:
   - composer install --prefer-source $COMPOSER_FLAGS
 
 script:
+  - composer validate --strict --no-check-lock
   - composer cscheck
 #  - composer phpstan
   - php -d apc.enable_cli=1 vendor/bin/phpunit
-#  - php -d apc.enable_cli=1 vendor/bin/infection
+#  - vendor/bin/infection
+#  - composer clover
+#  - composer bccheck
+#after_success:
+#  - bash <(curl -s https://codecov.io/bash)

@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/beryllium/cache.svg?branch=master)](https://travis-ci.org/beryllium/cache)
+
 Beryllium\Cache
 ===============
 
