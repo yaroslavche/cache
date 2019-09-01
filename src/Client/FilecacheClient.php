@@ -4,6 +4,7 @@ namespace Beryllium\Cache\Client;
 
 use Beryllium\Cache\Statistics\Tracker\StatisticsTrackerInterface;
 use Psr\SimpleCache\CacheInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Uses the filesystem to store and retrieve cache entries
@@ -19,26 +20,19 @@ class FilecacheClient implements CacheInterface
 
     private $path;
 
-    /** @var \Beryllium\Cache\Statistics\Tracker\StatisticsTrackerInterface */
+    /** @var StatisticsTrackerInterface */
     private $statisticsTracker;
 
     /**
-     * @param string|null $path
+     * @param string $path
+     * @throws \Exception
      */
-    public function __construct($path)
+    public function __construct(string $path)
     {
         $path = rtrim($path, DIRECTORY_SEPARATOR);
 
-        if (empty($path)) {
-            return;
-        }
-
-        if (!is_dir($path) && !mkdir($path) && !is_dir($path)) {
-            return;
-        }
-
-        if (!is_writable($path)) {
-            return;
+        if (empty($path) || (!is_dir($path) && !mkdir($path) && !is_dir($path)) || !is_writable($path)) {
+            throw new \Exception('invalid_path_exception');
         }
 
         $this->path = $path;
@@ -46,17 +40,14 @@ class FilecacheClient implements CacheInterface
 
     /**
      * @param string $key
+     * @param null $default
      * @return bool|mixed
+     * @throws InvalidArgumentException
      */
     public function get($key, $default = null)
     {
-        if (empty($key) || !$this->isSafe()) {
-            return $default;
-        }
-
-        if (!file_exists($this->getFilename($key))) {
+        if (!$this->has($key)) {
             $this->incrementAndWriteStatistics(false);
-
             return $default;
         }
 
@@ -90,14 +81,14 @@ class FilecacheClient implements CacheInterface
     public function set($key, $value, $ttl = null)
     {
         $file = array(
-            'key'   => $key,
+            'key' => $key,
             'value' => serialize($value),
-            'ttl'   => $ttl,
+            'ttl' => $ttl,
             'ctime' => time(),
         );
 
-        if ($this->isSafe() && !empty($key)) {
-            return (bool) file_put_contents($this->getFilename($key), json_encode($file));
+        if (!empty($key)) {
+            return (bool)file_put_contents($this->getFilename($key), json_encode($file));
         }
 
         return false;
@@ -106,11 +97,15 @@ class FilecacheClient implements CacheInterface
     /**
      * @param string $key
      * @return bool
+     * @throws InvalidArgumentException
      */
-    public function delete($key)
+    public function delete($key): bool
     {
-        $filename = $this->getFilename($key);
+        if (!$this->has($key)) {
+            return false;
+        }
 
+        $filename = $this->getFilename($key);
         if (file_exists($filename)) {
             unlink($filename);
 
@@ -121,17 +116,9 @@ class FilecacheClient implements CacheInterface
     }
 
     /**
-     * @return bool
-     */
-    public function isSafe()
-    {
-        return $this->path !== null;
-    }
-
-    /**
      * @param StatisticsTrackerInterface $statisticsTracker
      */
-    public function setStatisticsTracker(StatisticsTrackerInterface $statisticsTracker)
+    public function setStatisticsTracker(StatisticsTrackerInterface $statisticsTracker): void
     {
         $this->statisticsTracker = $statisticsTracker;
     }
@@ -139,7 +126,7 @@ class FilecacheClient implements CacheInterface
     /**
      * @param bool $hit
      */
-    private function incrementAndWriteStatistics($hit)
+    private function incrementAndWriteStatistics($hit): void
     {
         if (!$this->statisticsTracker) {
             return;
@@ -158,7 +145,7 @@ class FilecacheClient implements CacheInterface
      * @param string $key
      * @return string
      */
-    private function getFilename($key)
+    private function getFilename($key): string
     {
         return $this->path . DIRECTORY_SEPARATOR . md5($key) . '_file.cache';
     }
@@ -168,7 +155,7 @@ class FilecacheClient implements CacheInterface
      *
      * @return bool True on success and false on failure.
      */
-    public function clear()
+    public function clear(): bool
     {
         throw new \RuntimeException('FilecacheClient clear() support is not implemented.');
     }
@@ -185,19 +172,11 @@ class FilecacheClient implements CacheInterface
      *
      * @return bool
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws InvalidArgumentException
      *   MUST be thrown if the $key string is not a legal value.
      */
-    public function has($key)
+    public function has($key): bool
     {
-        if (empty($key) || !$this->isSafe()) {
-            return false;
-        }
-
-        if (!file_exists($this->getFilename($key))) {
-            return false;
-        }
-
-        return true;
+        return !empty($key) && file_exists($this->getFilename($key));
     }
 }

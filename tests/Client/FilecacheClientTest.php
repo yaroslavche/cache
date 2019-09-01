@@ -6,19 +6,16 @@ use Beryllium\Cache\Client\FilecacheClient;
 use Beryllium\Cache\Statistics\Manager\FilecacheStatisticsManager;
 use Beryllium\Cache\Statistics\Tracker\FilecacheStatisticsTracker;
 use org\bovigo\vfs\vfsStream;
+use org\bovigo\vfs\vfsStreamDirectory;
 use PHPUnit\Framework\TestCase;
 
 class FilecacheClientTest extends TestCase
 {
 
-    /**
-     * @var vfsStreamDirectory
-     */
+    /** @var vfsStreamDirectory $vfs*/
     public $vfs;
 
-    /**
-     * @var FilecacheClient
-     */
+    /** @var FilecacheClient $cache*/
     public $cache;
 
     public function setUp(): void
@@ -27,11 +24,9 @@ class FilecacheClientTest extends TestCase
         $this->cache = new FilecacheClient(vfsStream::url('cacheDir'));
     }
 
-    public function testFilecacheConstruct()
+    public function testInstance()
     {
-        $this->assertTrue($this->cache->isSafe());
-
-        // @todo Test failure scenarios
+        $this->assertInstanceOf(FilecacheClient::class, $this->cache);
     }
 
     public function testSetAndGet()
@@ -74,5 +69,26 @@ class FilecacheClientTest extends TestCase
             ),
             $numbers
         );
+    }
+
+    public function testClient()
+    {
+        $this->assertFalse($this->cache->has('unknown_key_' . mt_rand(0, PHP_INT_MAX)));
+        $this->assertTrue($this->cache->set('Some_key', 'Some_value', 20));
+        $this->assertTrue($this->cache->setMultiple(['k1' => 'v1', 'k2' => 'v2'], 20));
+        $this->assertSame('Some_value', $this->cache->get('Some_key'));
+        $this->assertEquals(['k1' => 'v1', 'k2' => 'v2'], $this->cache->getMultiple(['k1', 'k2']));
+        $this->assertTrue($this->cache->delete('k1'));
+        $this->assertFalse($this->cache->has('k1'));
+        $this->assertTrue($this->cache->deleteMultiple(['k2']));
+        $this->assertFalse($this->cache->has('k2'));
+    }
+
+    public function testInvalidPath()
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('invalid_path_exception');
+        $this->expectExceptionCode(0);
+        new FilecacheClient('');
     }
 }
