@@ -14,6 +14,7 @@ use Psr\SimpleCache\CacheInterface;
  */
 class CacheTest extends TestCase
 {
+    /** @var CacheInterface $client */
     protected $client;
 
     protected function setUp(): void
@@ -122,5 +123,11 @@ class CacheTest extends TestCase
             array('test-key', 'prefix_test-key', 'prefix_'),
             array('another-key', 'be--another-key', 'be--'),
         );
+    }
+
+    public function testGetClient()
+    {
+        $cache = new Cache($this->client);
+        $this->assertInstanceOf(CacheInterface::class, $cache->getClient());
     }
 }
